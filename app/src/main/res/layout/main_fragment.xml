@@ -3,6 +3,21 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools">
 
+    <data>
+
+        <variable
+            name="viewModel"
+            type="com.shouman.apps.thirdwayv.calac.ui.main.MainViewModel" />
+
+        <variable
+            name="validator"
+            type="com.shouman.apps.thirdwayv.calac.Validator" />
+
+        <variable
+            name="operand"
+            type="String" />
+    </data>
+
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/main"
         android:layout_width="match_parent"
@@ -45,7 +60,7 @@
             app:layout_constraintEnd_toEndOf="@id/guideline"
             app:layout_constraintStart_toStartOf="@+id/guideline2"
             app:layout_constraintTop_toBottomOf="@+id/result"
-            app:setEndIconActive="@{validator.Companion.isOwnerNameValid(ownerName)}">
+            app:setEndIconActive="@{validator.Companion.isOperandValid(operand)}">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:layout_width="match_parent"
@@ -54,7 +69,7 @@
                 android:inputType="number"
                 android:maxLength="100"
                 android:maxLines="1"
-                android:text="@={}"
+                android:text="@={operand}"
                 android:textAppearance="@style/TextAppearance.MaterialComponents.Headline5"
                 android:textColor="@color/primary_text"
                 android:textColorHint="@color/secondary_text"
@@ -171,7 +186,7 @@
 
 
         <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/activities_recView"
+            android:id="@+id/cells_recView"
             android:layout_width="0dp"
             android:layout_height="0dp"
             android:layout_marginTop="8dp"

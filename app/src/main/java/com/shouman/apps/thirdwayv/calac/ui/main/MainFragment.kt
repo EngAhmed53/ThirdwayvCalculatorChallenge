@@ -1,30 +1,44 @@
 package com.shouman.apps.thirdwayv.calac.ui.main
 
-import androidx.lifecycle.ViewModelProviders
 import android.os.Bundle
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import com.shouman.apps.thirdwayv.calac.R
+import androidx.fragment.app.Fragment
+import androidx.lifecycle.ViewModelProvider
+import com.shouman.apps.thirdwayv.calac.adapter.CellGridAdapter
+import com.shouman.apps.thirdwayv.calac.databinding.MainFragmentBinding
 
 class MainFragment : Fragment() {
 
-    companion object {
-        fun newInstance() = MainFragment()
-    }
-
     private lateinit var viewModel: MainViewModel
+    private lateinit var mBinding: MainFragmentBinding
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
-                              savedInstanceState: Bundle?): View {
-        return inflater.inflate(R.layout.main_fragment, container, false)
+    override fun onCreateView(
+        inflater: LayoutInflater, container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View {
+
+        mBinding = MainFragmentBinding.inflate(inflater)
+
+        mBinding.apply {
+            cellsRecView.apply {
+                adapter = CellGridAdapter()
+                setHasFixedSize(true)
+            }
+        }
+
+        return mBinding.root
     }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
-        viewModel = ViewModelProviders.of(this).get(MainViewModel::class.java)
-        // TODO: Use the ViewModel
+        viewModel = ViewModelProvider(this).get(MainViewModel::class.java)
+
+        mBinding.lifecycleOwner = this
+
+        mBinding.viewModel = viewModel
+
     }
 
 }

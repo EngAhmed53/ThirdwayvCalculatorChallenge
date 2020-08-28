@@ -8,7 +8,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.shouman.apps.thirdwayv.calac.data.model.ItemCell
 import com.shouman.apps.thirdwayv.calac.databinding.CellListItemBinding
 
-class CellGridAdapter :
+class CellGridAdapter(private val onCellClickListener: OnCellClickListener) :
     ListAdapter<ItemCell, CellGridAdapter.CellViewHolder>(
         DiffCallback
     ) {
@@ -35,6 +35,8 @@ class CellGridAdapter :
     ) : RecyclerView.ViewHolder(mBinding.root) {
         fun bind(item: ItemCell) {
             mBinding.item = item
+            mBinding.root.setOnClickListener {
+            }
             mBinding.executePendingBindings()
         }
     }
@@ -51,7 +53,13 @@ class CellGridAdapter :
 
     override fun onBindViewHolder(holder: CellViewHolder, position: Int) {
         val item = getItem(position)
-
         holder.bind(item)
+        holder.itemView.setOnClickListener {
+            onCellClickListener.onClick(item)
+        }
+    }
+
+    class OnCellClickListener(val clickListener: (itemCell: ItemCell) -> Unit) {
+        fun onClick(item: ItemCell) = clickListener(item)
     }
 }

@@ -24,7 +24,6 @@ class MainViewModel(private val mainRepository: IRepository) : ViewModel() {
     }
 
     fun addNewCell() {
-
         mainRepository.addNewCell(
             ItemCell(
                 System.currentTimeMillis(),
@@ -34,6 +33,10 @@ class MainViewModel(private val mainRepository: IRepository) : ViewModel() {
         )
 
         restoreInputState()
+    }
+
+    fun removeCell(item: ItemCell) {
+        mainRepository.removeItem(item)
     }
 
     private fun restoreInputState() {

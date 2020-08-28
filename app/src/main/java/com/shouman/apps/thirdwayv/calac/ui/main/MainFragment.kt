@@ -24,7 +24,9 @@ class MainFragment : Fragment() {
 
         mBinding.apply {
             cellsRecView.apply {
-                adapter = CellGridAdapter()
+                adapter = CellGridAdapter(CellGridAdapter.OnCellClickListener {
+                    viewModel?.removeCell(it)
+                })
                 setHasFixedSize(true)
             }
         }

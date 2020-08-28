@@ -19,6 +19,10 @@ class MainViewModel(private val mainRepository: IRepository) : ViewModel() {
 
     val operandLiveData = MutableLiveData<String?>()
 
+    val undoStackSize = mainRepository.getUndoStackSize()
+
+    val redoStackSize = mainRepository.getRedoStackSize()
+
     val result = Transformations.map(_data) {
         calculate(it)
     }
@@ -31,12 +35,19 @@ class MainViewModel(private val mainRepository: IRepository) : ViewModel() {
                 operandLiveData.value!!.toInt()
             )
         )
-
         restoreInputState()
     }
 
     fun removeCell(item: ItemCell) {
         mainRepository.removeItem(item)
+    }
+
+    fun undo() {
+        mainRepository.undo()
+    }
+
+    fun redo() {
+        mainRepository.redo()
     }
 
     private fun restoreInputState() {
@@ -57,16 +68,32 @@ class MainViewModel(private val mainRepository: IRepository) : ViewModel() {
         reversedList.reverse()
         var result = 0.0
 
-        reversedList.forEach {
-            when (it.operation) {
-                '+' -> result += it.operand
-                '-' -> result -= it.operand
-                'x' -> result *= it.operand
-                '÷' -> result /= it.operand
+        try {
+            reversedList.forEach {
+                when (it.operation) {
+                    '+' -> result += it.operand
+                    '-' -> result -= it.operand
+                    'x' -> result *= it.operand
+                    '÷' -> {
+                        result /= it.operand
+                        if (result == Double.POSITIVE_INFINITY || result == Double.NEGATIVE_INFINITY) {
+                            throw ArithmeticException("divide by zero")
+                        }
+                    }
+                }
             }
+        } catch (e: java.lang.ArithmeticException) {
+            return 0.0.toString()
+        } finally {
+            reversedList.clear()
         }
-        reversedList.clear()
         return result.toString()
+    }
+
+
+    override fun onCleared() {
+        super.onCleared()
+        mainRepository.clearAll()
     }
 }
 

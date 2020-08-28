@@ -6,6 +6,8 @@
     <string name="sub_symbol">-</string>
     <string name="multi_symbol">x</string>
     <string name="equal">=</string>
-
+    <string name="result">Result = %1$s</string>
+    <string name="undo_last_change">undo last change</string>
+    <string name="redo_last_change">redo last change</string>
 
 </resources>

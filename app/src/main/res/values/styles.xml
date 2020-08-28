@@ -1,7 +1,7 @@
 <resources>
     <!-- Base application theme. -->
     <!-- Base application theme. -->
-    <style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar">
+    <style name="AppTheme" parent="Theme.MaterialComponents.Light.NoActionBar">
         <!-- Customize your theme here. -->
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
@@ -12,10 +12,10 @@
     <style name="CalcButtonStyle">
 
         <item name="android:background">@drawable/button_box_shape</item>
-        <item name="android:fontFamily">sans-serif-black</item>
+        <item name="android:fontFamily">sans-serif</item>
         <item name="android:gravity">center</item>
-        <item name="android:padding">16dp</item>
-        <item name="android:textAppearance">@style/TextAppearance.MaterialComponents.Headline5
+        <item name="android:padding">12dp</item>
+        <item name="android:textAppearance">@style/TextAppearance.MaterialComponents.Headline6
         </item>
     </style>
 

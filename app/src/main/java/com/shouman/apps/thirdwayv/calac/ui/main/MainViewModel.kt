@@ -1,53 +1,74 @@
 package com.shouman.apps.thirdwayv.calac.ui.main
 
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.*
 import com.shouman.apps.thirdwayv.calac.data.model.ItemCell
+import com.shouman.apps.thirdwayv.calac.data.repository.IRepository
 import com.shouman.apps.thirdwayv.calac.data.repository.MainRepository
 import java.util.*
 
+class MainViewModel(private val mainRepository: IRepository) : ViewModel() {
 
-enum class Operation {
-    PLUS,
-    SUB,
-    MULTI,
-    DIV
-}
 
-class MainViewModel(val mainRepository: MainRepository) : ViewModel() {
+    private val _data = mainRepository.getAllCells()
+    val data: LiveData<LinkedList<ItemCell>>
+        get() = _data
 
-    private val _data = MutableLiveData(mainRepository.getAllCells())
-    val data:LiveData<LinkedList<ItemCell>>
-    get() = _data
-
-    private val _selectedOperationLiveData = MutableLiveData<Operation?>()
-    val selectedOperationLiveData: LiveData<Operation?>
+    private val _selectedOperationLiveData = MutableLiveData<Char?>()
+    val selectedOperationLiveData: LiveData<Char?>
         get() = _selectedOperationLiveData
 
+    val operandLiveData = MutableLiveData<String?>()
 
-    fun addNewCell(operand: Int) {
+    val result = Transformations.map(_data) {
+        calculate(it)
+    }
+
+    fun addNewCell() {
+
         mainRepository.addNewCell(
             ItemCell(
                 System.currentTimeMillis(),
-                when (_selectedOperationLiveData.value) {
-                    Operation.PLUS -> '+'
-                    Operation.SUB -> '-'
-                    Operation.DIV -> '÷'
-                    Operation.MULTI -> 'x'
-                    else -> throw java.lang.IllegalArgumentException("This operation not accepted")
-                },
-                operand
+                _selectedOperationLiveData.value!!,
+                operandLiveData.value!!.toInt()
             )
         )
-        _data.value = mainRepository.getAllCells();
+
+        restoreInputState()
+    }
+
+    private fun restoreInputState() {
+        _selectedOperationLiveData.value = null
+        operandLiveData.value = null
+    }
+
+    fun selectOperation(operation: Char?) {
+        _selectedOperationLiveData.value = operation
+    }
+
+
+    private fun calculate(list: LinkedList<ItemCell>?): String? {
+        if (list.isNullOrEmpty()) {
+            return ""
+        }
+        val reversedList = LinkedList(list)
+        reversedList.reverse()
+        var result = 0.0
+
+        reversedList.forEach {
+            when (it.operation) {
+                '+' -> result += it.operand
+                '-' -> result -= it.operand
+                'x' -> result *= it.operand
+                '÷' -> result /= it.operand
+            }
+        }
+        reversedList.clear()
+        return result.toString()
     }
 }
 
-
 @Suppress("UNCHECKED_CAST")
-class CustomerProfileViewModelFactory(
+class MainViewModelFactory(
     private val mainRepository: MainRepository
 ) :
     ViewModelProvider.NewInstanceFactory() {

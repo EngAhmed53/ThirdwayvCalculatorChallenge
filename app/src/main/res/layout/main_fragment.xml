@@ -13,9 +13,6 @@
             name="validator"
             type="com.shouman.apps.thirdwayv.calac.Validator" />
 
-        <variable
-            name="operand"
-            type="String" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -26,11 +23,12 @@
 
         <TextView
             android:id="@+id/result"
+            result="@{viewModel.result}"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:fontFamily="sans-serif-medium"
             android:gravity="center"
-            android:padding="8dp"
+            android:padding="16dp"
             android:textAppearance="@style/TextAppearance.MaterialComponents.Headline5"
             android:textColor="@color/primary_text"
             app:layout_constraintEnd_toStartOf="@+id/guideline"
@@ -60,7 +58,7 @@
             app:layout_constraintEnd_toEndOf="@id/guideline"
             app:layout_constraintStart_toStartOf="@+id/guideline2"
             app:layout_constraintTop_toBottomOf="@+id/result"
-            app:setEndIconActive="@{validator.Companion.isOperandValid(operand)}">
+            app:setEndIconActive="@{validator.Companion.isOperandValid(viewModel.operandLiveData)}">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:layout_width="match_parent"
@@ -69,7 +67,7 @@
                 android:inputType="number"
                 android:maxLength="100"
                 android:maxLines="1"
-                android:text="@={operand}"
+                android:text="@={viewModel.operandLiveData}"
                 android:textAppearance="@style/TextAppearance.MaterialComponents.Headline5"
                 android:textColor="@color/primary_text"
                 android:textColorHint="@color/secondary_text"
@@ -77,126 +75,131 @@
         </com.google.android.material.textfield.TextInputLayout>
 
 
-        <HorizontalScrollView
-            android:id="@+id/horizontalScrollView"
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/row_1"
             android:layout_width="0dp"
-            android:layout_height="wrap_content"
+            android:layout_height="65dp"
+            android:layout_gravity="center"
             android:layout_marginTop="8dp"
-            android:scrollbars="none"
             app:layout_constraintEnd_toStartOf="@+id/guideline"
             app:layout_constraintStart_toStartOf="@+id/guideline2"
-            app:layout_constraintTop_toBottomOf="@+id/operand_inputLayout"
-            app:layout_scrollFlags="scroll|enterAlways|snap">
+            app:layout_constraintTop_toBottomOf="@+id/operand_inputLayout">
 
-            <androidx.constraintlayout.widget.ConstraintLayout
-                android:id="@+id/row_1"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center">
+            <ImageButton
+                android:id="@+id/btn_undo"
+                style="@style/CalcButtonStyle"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:contentDescription="@string/undo_last_change"
+                android:src="@drawable/ic_outline_undo_24"
+                android:tint="@color/colorAccent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintDimensionRatio="1:1"
+                app:layout_constraintEnd_toStartOf="@id/btn_plus"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
 
-                <ImageButton
-                    android:id="@+id/btn_undo"
-                    style="@style/CalcButtonStyle"
-                    android:layout_width="0dp"
-                    android:layout_height="0dp"
-                    android:src="@drawable/ic_outline_undo_24"
-                    android:tint="@color/colorAccent"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintDimensionRatio="1.2:1"
-                    app:layout_constraintEnd_toStartOf="@id/btn_plus"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent" />
+            <TextView
+                android:id="@+id/btn_plus"
+                style="@style/CalcButtonStyle"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                selectedStatus="@{viewModel.selectedOperationLiveData}"
+                android:onClick="@{() -> viewModel.selectOperation('+')}"
+                android:text="@string/add_symbol"
+                android:textColor="@color/colorPrimary"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintDimensionRatio="1:1"
+                app:layout_constraintEnd_toStartOf="@id/btn_sub"
+                app:layout_constraintStart_toEndOf="@+id/btn_undo"
+                app:layout_constraintTop_toTopOf="parent" />
 
-                <TextView
-                    android:id="@+id/btn_plus"
-                    style="@style/CalcButtonStyle"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:text="@string/add_symbol"
-                    android:textColor="@color/colorPrimary"
-                    app:layout_constraintBaseline_toBaselineOf="@+id/btn_undo"
-                    app:layout_constraintDimensionRatio="1.2:1"
-                    app:layout_constraintEnd_toStartOf="@id/btn_sub"
-                    app:layout_constraintStart_toEndOf="@+id/btn_undo" />
+            <TextView
+                android:id="@+id/btn_sub"
+                style="@style/CalcButtonStyle"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                selectedStatus="@{viewModel.selectedOperationLiveData}"
+                android:onClick="@{() -> viewModel.selectOperation('-')}"
+                android:text="@string/sub_symbol"
+                android:textColor="@color/colorPrimary"
+                app:layout_constraintBaseline_toBaselineOf="@+id/btn_plus"
+                app:layout_constraintDimensionRatio="1:1"
+                app:layout_constraintEnd_toStartOf="@id/btn_multi"
+                app:layout_constraintStart_toEndOf="@+id/btn_plus" />
 
-                <TextView
-                    android:id="@+id/btn_sub"
-                    style="@style/CalcButtonStyle"
-                    android:layout_width="0dp"
-                    android:layout_height="0dp"
-                    android:text="@string/sub_symbol"
-                    android:textColor="@color/colorPrimary"
-                    app:layout_constraintBaseline_toBaselineOf="@+id/btn_plus"
-                    app:layout_constraintDimensionRatio="1.2:1"
-                    app:layout_constraintEnd_toStartOf="@id/btn_multi"
-                    app:layout_constraintStart_toEndOf="@+id/btn_plus" />
+            <TextView
+                android:id="@+id/btn_multi"
+                style="@style/CalcButtonStyle"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                selectedStatus="@{viewModel.selectedOperationLiveData}"
+                android:gravity="center"
+                android:onClick="@{() -> viewModel.selectOperation('x')}"
+                android:text="@string/multi_symbol"
+                android:textColor="@color/colorPrimary"
+                app:layout_constraintBaseline_toBaselineOf="@+id/btn_sub"
+                app:layout_constraintDimensionRatio="1:1"
+                app:layout_constraintEnd_toStartOf="@id/btn_div"
+                app:layout_constraintStart_toEndOf="@+id/btn_sub" />
 
-                <TextView
-                    android:id="@+id/btn_multi"
-                    style="@style/CalcButtonStyle"
-                    android:layout_width="0dp"
-                    android:layout_height="0dp"
-                    android:gravity="center"
-                    android:text="@string/multi_symbol"
-                    android:textColor="@color/colorPrimary"
-                    app:layout_constraintBaseline_toBaselineOf="@+id/btn_sub"
-                    app:layout_constraintDimensionRatio="1.2:1"
-                    app:layout_constraintEnd_toStartOf="@id/btn_div"
-                    app:layout_constraintStart_toEndOf="@+id/btn_sub" />
+            <TextView
+                android:id="@+id/btn_div"
+                style="@style/CalcButtonStyle"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                selectedStatus="@{viewModel.selectedOperationLiveData}"
+                android:onClick="@{() -> viewModel.selectOperation('÷')}"
+                android:text="@string/div_symbol"
+                android:textColor="@color/colorPrimary"
+                app:layout_constraintBaseline_toBaselineOf="@+id/btn_multi"
+                app:layout_constraintDimensionRatio="1:1"
+                app:layout_constraintEnd_toStartOf="@id/btn_equal"
+                app:layout_constraintStart_toEndOf="@+id/btn_multi" />
 
-                <TextView
-                    android:id="@+id/btn_div"
-                    style="@style/CalcButtonStyle"
-                    android:layout_width="0dp"
-                    android:layout_height="0dp"
-                    android:text="@string/div_symbol"
-                    android:textColor="@color/colorPrimary"
-                    app:layout_constraintBaseline_toBaselineOf="@+id/btn_multi"
-                    app:layout_constraintDimensionRatio="1.2:1"
-                    app:layout_constraintEnd_toStartOf="@id/btn_equal"
-                    app:layout_constraintStart_toEndOf="@+id/btn_multi" />
+            <TextView
+                android:id="@+id/btn_equal"
+                style="@style/CalcButtonStyle"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:clickable="@{validator.Companion.isOperandValid(viewModel.operandLiveData) &amp;&amp; viewModel.selectedOperationLiveData != null}"
+                android:onClick="@{() -> viewModel.addNewCell()}"
+                android:text="@string/equal"
+                android:textColor="@color/colorPrimary"
+                app:layout_constraintBaseline_toBaselineOf="@+id/btn_multi"
+                app:layout_constraintDimensionRatio="1:1"
+                app:layout_constraintEnd_toStartOf="@id/redo"
+                app:layout_constraintStart_toEndOf="@+id/btn_div" />
 
-                <TextView
-                    android:id="@+id/btn_equal"
-                    style="@style/CalcButtonStyle"
-                    android:layout_width="0dp"
-                    android:layout_height="0dp"
-                    android:text="@string/equal"
-                    android:textColor="@color/colorPrimary"
-                    app:layout_constraintBaseline_toBaselineOf="@+id/btn_multi"
-                    app:layout_constraintDimensionRatio="1.2:1"
-                    app:layout_constraintEnd_toStartOf="@id/redo"
-                    app:layout_constraintStart_toEndOf="@+id/btn_div" />
-
-                <ImageButton
-                    android:id="@+id/redo"
-                    style="@style/CalcButtonStyle"
-                    android:layout_width="0dp"
-                    android:layout_height="0dp"
-                    android:src="@drawable/ic_outline_redo_24"
-                    android:tint="@color/colorAccent"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintDimensionRatio="1.2:1"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toEndOf="@+id/btn_equal"
-                    app:layout_constraintTop_toTopOf="parent" />
-            </androidx.constraintlayout.widget.ConstraintLayout>
-
-        </HorizontalScrollView>
-
+            <ImageButton
+                android:id="@+id/redo"
+                style="@style/CalcButtonStyle"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:contentDescription="@string/redo_last_change"
+                android:src="@drawable/ic_outline_redo_24"
+                android:tint="@color/colorAccent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintDimensionRatio="1:1"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@+id/btn_equal"
+                app:layout_constraintTop_toTopOf="parent" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/cells_recView"
+            cellsList="@{viewModel.data}"
             android:layout_width="0dp"
             android:layout_height="0dp"
             android:layout_marginTop="8dp"
             android:layout_weight="1"
+            android:background="@color/primary_light"
             app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@+id/guideline"
             app:layout_constraintStart_toStartOf="@+id/guideline2"
-            app:layout_constraintTop_toBottomOf="@+id/horizontalScrollView"
-            app:spanCount="5"
+            app:layout_constraintTop_toBottomOf="@+id/row_1"
+            app:spanCount="4"
             tools:listitem="@layout/cell_list_item" />
 
 

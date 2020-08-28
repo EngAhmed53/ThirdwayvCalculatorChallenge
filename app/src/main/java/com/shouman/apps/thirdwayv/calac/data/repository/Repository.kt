@@ -9,22 +9,28 @@ import java.util.*
 interface IRepository {
     fun addNewCell(itemCell: ItemCell);
     fun removeItem(itemCell: ItemCell)
-    fun getAllCells(): LinkedList<ItemCell>
+    fun getAllCells(): LiveData<LinkedList<ItemCell>>
 }
 
 object MainRepository : IRepository {
 
-    private val database = LinkedList<ItemCell>()
+    private val database = MutableLiveData<LinkedList<ItemCell>>()
 
     override fun addNewCell(itemCell: ItemCell) {
-        database.add(itemCell)
+        val list = database.value ?: LinkedList<ItemCell>()
+        list.addFirst(itemCell)
+        database.value = list
     }
 
     override fun removeItem(itemCell: ItemCell) {
-        database.remove(itemCell)
+        val list = database.value
+        if (list.isNullOrEmpty()) return
+
+        list.remove(itemCell)
+        database.value = list
     }
 
-    override fun getAllCells(): LinkedList<ItemCell> {
+    override fun getAllCells(): LiveData<LinkedList<ItemCell>> {
         return database
     }
 }

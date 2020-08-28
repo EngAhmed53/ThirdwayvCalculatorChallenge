@@ -7,6 +7,7 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import com.shouman.apps.thirdwayv.calac.adapter.CellGridAdapter
+import com.shouman.apps.thirdwayv.calac.data.repository.MainRepository
 import com.shouman.apps.thirdwayv.calac.databinding.MainFragmentBinding
 
 class MainFragment : Fragment() {
@@ -33,12 +34,12 @@ class MainFragment : Fragment() {
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
-        viewModel = ViewModelProvider(this).get(MainViewModel::class.java)
+        val factory = MainViewModelFactory(MainRepository)
+        viewModel = ViewModelProvider(this, factory).get(MainViewModel::class.java)
 
         mBinding.lifecycleOwner = this
 
         mBinding.viewModel = viewModel
-
     }
 
 }

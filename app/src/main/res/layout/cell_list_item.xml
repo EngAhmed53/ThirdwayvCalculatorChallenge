@@ -11,7 +11,7 @@
     </data>
 
     <com.google.android.material.card.MaterialCardView
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_margin="8dp"
         app:cardCornerRadius="4dp"
@@ -19,19 +19,24 @@
         tools:background="@color/colorAccent">
 
         <androidx.constraintlayout.widget.ConstraintLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
             android:background="@android:color/transparent">
 
             <TextView
-                android:layout_width="wrap_content"
+                cellValue="@{item}"
+                android:layout_width="0dp"
                 android:layout_height="0dp"
                 android:background="@android:color/transparent"
+                android:ellipsize="end"
                 android:fontFamily="sans-serif"
                 android:gravity="center"
                 android:padding="16dp"
                 android:textAppearance="@style/TextAppearance.MaterialComponents.Headline6"
-                android:textColor="@color/icons"
+                android:textColor="@color/primary_text"
+                app:autoSizeMaxTextSize="20sp"
+                app:autoSizeMinTextSize="12sp"
+                app:autoSizeTextType="uniform"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintDimensionRatio="1:1"
                 app:layout_constraintEnd_toEndOf="parent"

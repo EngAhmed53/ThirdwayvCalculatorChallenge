@@ -1,3 +1,11 @@
 <resources>
-    <string name="app_name">calac</string>
+    <string name="app_name">calc</string>
+    <string name="please_enter_the_second_operand">Please enter the second operand</string>
+    <string name="div_symbol">÷</string>
+    <string name="add_symbol">+</string>
+    <string name="sub_symbol">-</string>
+    <string name="multi_symbol">x</string>
+    <string name="equal">=</string>
+
+
 </resources>

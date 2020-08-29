@@ -4,6 +4,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Transformations
 import com.shouman.apps.thirdwayv.calac.data.model.ItemCell
+import com.shouman.apps.thirdwayv.calac.executors.AppExecutors
 import java.util.*
 
 
@@ -32,40 +33,49 @@ object MainRepository : IRepository {
 
 
     override fun addNewCell(itemCell: ItemCell) {
-        var historyLinkedList = history.value
-        if (historyLinkedList.isNullOrEmpty()) {
-            historyLinkedList = LinkedList()
-            val firstRecord = LinkedList<ItemCell>()
-            firstRecord.addFirst(itemCell)
-            historyLinkedList.push(firstRecord)
-            history.value = historyLinkedList
-            cursor.value = historyLinkedList.indexOf(firstRecord)
 
-            return
-        }
+        AppExecutors.getsInstance().diskIO.execute {
 
-        val lastRecord = historyLinkedList.peek()
-        if (lastRecord != null) {
-            val newRecord = LinkedList(lastRecord)
-            newRecord.addFirst(itemCell)
-            historyLinkedList.push(newRecord)
-            history.value = historyLinkedList
-            cursor.value = historyLinkedList.indexOf(newRecord)
+            var historyLinkedList = history.value
+            if (historyLinkedList.isNullOrEmpty()) {
+                historyLinkedList = LinkedList()
+                val firstRecord = LinkedList<ItemCell>()
+                firstRecord.addFirst(itemCell)
+                historyLinkedList.push(firstRecord)
+                history.postValue(historyLinkedList)
+                cursor.postValue(historyLinkedList.indexOf(firstRecord))
+
+                return@execute
+            }
+
+            val lastRecord = historyLinkedList.peek()
+            if (lastRecord != null) {
+                val newRecord = LinkedList(lastRecord)
+                newRecord.addFirst(itemCell)
+                historyLinkedList.push(newRecord)
+                history.postValue(historyLinkedList)
+                cursor.postValue(historyLinkedList.indexOf(newRecord))
+            }
         }
     }
 
     override fun removeItem(itemCell: ItemCell) {
-        val historyLinkedList = history.value
-        if (historyLinkedList.isNullOrEmpty()) return
 
-        val lastRecord = historyLinkedList.peek()
-        if (lastRecord != null) {
+        AppExecutors.getsInstance().diskIO.execute {
 
-            val newRecord = LinkedList(lastRecord)
-            newRecord.remove(itemCell)
-            historyLinkedList.push(newRecord)
-            history.value = historyLinkedList
-            cursor.value = historyLinkedList.indexOf(newRecord)
+            val historyLinkedList = history.value
+            if (historyLinkedList.isNullOrEmpty()) return@execute
+
+            val lastRecord = historyLinkedList.peek()
+            if (lastRecord != null) {
+
+                val newRecord = LinkedList(lastRecord)
+                newRecord.remove(itemCell)
+                historyLinkedList.push(newRecord)
+                history.postValue(historyLinkedList)
+                cursor.postValue(historyLinkedList.indexOf(newRecord))
+
+            }
 
         }
     }
@@ -77,30 +87,43 @@ object MainRepository : IRepository {
     }
 
     override fun undo() {
-        val cursorPosition = cursor.value
-        val historyLinkedList = history.value
-        if (historyLinkedList.isNullOrEmpty() || cursorPosition == null || cursorPosition == historyLinkedList.size - 1) return
 
-        val previousRecord = historyLinkedList[cursorPosition + 1]
-        historyLinkedList.push(previousRecord)
-        history.value = historyLinkedList
-        cursor.value = cursorPosition + 2
-        redoCounter.value = (redoCounter.value ?: 0) + 1
+        AppExecutors.getsInstance().diskIO.execute {
+
+            val cursorPosition = cursor.value
+            val historyLinkedList = history.value
+            if (historyLinkedList.isNullOrEmpty()
+                || cursorPosition == null
+                || cursorPosition == historyLinkedList.size - 1
+            ) return@execute
+
+            val previousRecord = historyLinkedList[cursorPosition + 1]
+            historyLinkedList.push(previousRecord)
+            history.postValue(historyLinkedList)
+            cursor.postValue(cursorPosition + 2)
+            redoCounter.postValue((redoCounter.value ?: 0) + 1)
+
+        }
     }
 
     override fun redo() {
-        val redoTimes = redoCounter.value
-        if (redoTimes == null || redoTimes == 0) return
 
-        val cursorPosition = cursor.value
-        val historyLinkedList = history.value
-        if (historyLinkedList.isNullOrEmpty() || cursorPosition == null || cursorPosition == 0) return
+        AppExecutors.getsInstance().diskIO.execute {
 
-        val followingRecord = historyLinkedList[cursorPosition - 1]
-        historyLinkedList.push(followingRecord)
-        history.value = historyLinkedList
-        redoCounter.value = (redoCounter.value ?: 0) - 1
-        cursor.value = cursorPosition
+            val redoTimes = redoCounter.value
+            if (redoTimes == null || redoTimes == 0) return@execute
+
+            val cursorPosition = cursor.value
+            val historyLinkedList = history.value
+            if (historyLinkedList.isNullOrEmpty() || cursorPosition == null || cursorPosition == 0) return@execute
+
+            val followingRecord = historyLinkedList[cursorPosition - 1]
+            historyLinkedList.push(followingRecord)
+            history.postValue(historyLinkedList)
+            redoCounter.postValue((redoCounter.value ?: 0) - 1)
+            cursor.postValue(cursorPosition)
+
+        }
     }
 
     override fun isRedoAvailable(): LiveData<Boolean> {
@@ -118,6 +141,8 @@ object MainRepository : IRepository {
     }
 
     override fun clearAll() {
-
+        this.cursor.value = null
+        this.history.value = null
+        this.redoCounter.value = null
     }
 }

@@ -19,7 +19,7 @@ interface IRepository {
     fun clearAll()
 }
 
-object MainRepository : IRepository {
+class MainRepository : IRepository {
 
     private val history = MutableLiveData<LinkedList<LinkedList<ItemCell>>>().apply {
         val initialHistory = LinkedList<LinkedList<ItemCell>>()
@@ -76,13 +76,12 @@ object MainRepository : IRepository {
                 cursor.postValue(historyLinkedList.indexOf(newRecord))
 
             }
-
         }
     }
 
     override fun getLatestRecord(): LiveData<List<ItemCell>> {
         return Transformations.map(history) {
-            it.peek()?.toList()
+            it?.peek()?.toList()
         }
     }
 

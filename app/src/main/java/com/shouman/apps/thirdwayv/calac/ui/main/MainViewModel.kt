@@ -31,8 +31,8 @@ class MainViewModel(private val mainRepository: IRepository) : ViewModel() {
         mainRepository.addNewCell(
             ItemCell(
                 System.currentTimeMillis(),
-                _selectedOperationLiveData.value!!,
-                operandLiveData.value!!.toInt()
+                _selectedOperationLiveData.value,
+                operandLiveData.value?.toInt()
             )
         )
         restoreInputState()
@@ -71,11 +71,11 @@ class MainViewModel(private val mainRepository: IRepository) : ViewModel() {
         try {
             reversedList.forEach {
                 when (it.operation) {
-                    '+' -> result += it.operand
-                    '-' -> result -= it.operand
-                    'x' -> result *= it.operand
+                    '+' -> result += it.operand!!
+                    '-' -> result -= it.operand!!
+                    'x' -> result *= it.operand!!
                     '÷' -> {
-                        result /= it.operand
+                        result /= it.operand!!
                         if (result == Double.POSITIVE_INFINITY || result == Double.NEGATIVE_INFINITY) {
                             throw ArithmeticException("divide by zero")
                         }
@@ -90,11 +90,6 @@ class MainViewModel(private val mainRepository: IRepository) : ViewModel() {
         return result.toString()
     }
 
-
-    override fun onCleared() {
-        super.onCleared()
-        mainRepository.clearAll()
-    }
 }
 
 @Suppress("UNCHECKED_CAST")

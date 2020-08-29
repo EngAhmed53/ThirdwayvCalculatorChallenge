@@ -36,7 +36,7 @@ class MainFragment : Fragment() {
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
-        val factory = MainViewModelFactory(MainRepository)
+        val factory = MainViewModelFactory(MainRepository())
         viewModel = ViewModelProvider(this, factory).get(MainViewModel::class.java)
 
         mBinding.lifecycleOwner = this

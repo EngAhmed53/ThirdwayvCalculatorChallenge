@@ -11,7 +11,7 @@
 
         <variable
             name="validator"
-            type="com.shouman.apps.thirdwayv.calac.Validator" />
+            type="com.shouman.apps.thirdwayv.calac.utils.Validator" />
 
     </data>
 
@@ -91,7 +91,7 @@
                 style="@style/CalcButtonStyle"
                 android:layout_width="0dp"
                 android:layout_height="0dp"
-                android:clickable="@{viewModel.undoStackSize > 0}"
+                android:clickable="@{viewModel.isUndoAvailable}"
                 android:contentDescription="@string/undo_last_change"
                 android:onClick="@{() -> viewModel.undo()}"
                 android:src="@drawable/ic_outline_undo_24"
@@ -179,7 +179,7 @@
                 style="@style/CalcButtonStyle"
                 android:layout_width="0dp"
                 android:layout_height="0dp"
-                android:clickable="@{viewModel.redoStackSize > 0}"
+                android:clickable="@{viewModel.isRedoAvailable}"
                 android:contentDescription="@string/redo_last_change"
                 android:onClick="@{() -> viewModel.redo()}"
                 android:src="@drawable/ic_outline_redo_24"

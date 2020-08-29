@@ -9,8 +9,8 @@ import java.util.*
 class MainViewModel(private val mainRepository: IRepository) : ViewModel() {
 
 
-    private val _data = mainRepository.getAllCells()
-    val data: LiveData<LinkedList<ItemCell>>
+    private val _data = mainRepository.getLatestRecord()
+    val data: LiveData<List<ItemCell>>
         get() = _data
 
     private val _selectedOperationLiveData = MutableLiveData<Char?>()
@@ -19,9 +19,9 @@ class MainViewModel(private val mainRepository: IRepository) : ViewModel() {
 
     val operandLiveData = MutableLiveData<String?>()
 
-    val undoStackSize = mainRepository.getUndoStackSize()
+    val isUndoAvailable = mainRepository.isUndoAvailable()
 
-    val redoStackSize = mainRepository.getRedoStackSize()
+    val isRedoAvailable = mainRepository.isRedoAvailable()
 
     val result = Transformations.map(_data) {
         calculate(it)
@@ -60,9 +60,9 @@ class MainViewModel(private val mainRepository: IRepository) : ViewModel() {
     }
 
 
-    private fun calculate(list: LinkedList<ItemCell>?): String? {
+    private fun calculate(list: List<ItemCell>?): String? {
         if (list.isNullOrEmpty()) {
-            return ""
+            return "0.0"
         }
         val reversedList = LinkedList(list)
         reversedList.reverse()

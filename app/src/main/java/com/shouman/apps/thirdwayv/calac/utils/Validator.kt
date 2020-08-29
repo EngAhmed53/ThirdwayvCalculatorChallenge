@@ -1,4 +1,4 @@
-package com.shouman.apps.thirdwayv.calac
+package com.shouman.apps.thirdwayv.calac.utils
 
 class Validator {
     companion object {

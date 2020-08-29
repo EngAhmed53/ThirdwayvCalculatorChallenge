@@ -12,10 +12,10 @@ import com.shouman.apps.thirdwayv.calac.data.model.ItemCell
 import java.util.*
 
 @BindingAdapter("cellsList")
-fun RecyclerView.setData(list: LinkedList<ItemCell>?) {
+fun RecyclerView.setData(list: List<ItemCell>?) {
     list?.let {
         val gridAdapter = adapter as CellGridAdapter
-        gridAdapter.submitList(list.toList())
+        gridAdapter.submitList(list)
     }
 }
 

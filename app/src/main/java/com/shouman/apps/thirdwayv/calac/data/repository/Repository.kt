@@ -10,133 +10,114 @@ import java.util.*
 interface IRepository {
     fun addNewCell(itemCell: ItemCell)
     fun removeItem(itemCell: ItemCell)
-    fun getAllCells(): LiveData<LinkedList<ItemCell>>
+    fun getLatestRecord(): LiveData<List<ItemCell>>
     fun undo()
     fun redo()
-    fun getRedoStackSize(): LiveData<Int>
-    fun getUndoStackSize(): LiveData<Int>
+    fun isRedoAvailable(): LiveData<Boolean>
+    fun isUndoAvailable(): LiveData<Boolean>
     fun clearAll()
 }
 
-enum class OperationType {
-    ADD_ITEM,
-    REMOVE_ITEM
-}
-
-class Operation(
-    val itemCell: ItemCell,
-    var type: OperationType
-)
-
 object MainRepository : IRepository {
 
-    private val database = MutableLiveData<LinkedList<ItemCell>>()
+    private val history = MutableLiveData<LinkedList<LinkedList<ItemCell>>>().apply {
+        val initialHistory = LinkedList<LinkedList<ItemCell>>()
+        initialHistory.add(LinkedList())
+        value = initialHistory
+    }
 
-    private val undoStackLiveData = MutableLiveData<Stack<Operation>>()
-    private val redoStackLiveData = MutableLiveData<Stack<Operation>>()
+    private val cursor = MutableLiveData<Int?>()
+
+    private val redoCounter = MutableLiveData<Int?>()
+
 
     override fun addNewCell(itemCell: ItemCell) {
-        val list = database.value ?: LinkedList<ItemCell>()
-        list.addFirst(itemCell)
-        database.value = list
+        var historyLinkedList = history.value
+        if (historyLinkedList.isNullOrEmpty()) {
+            historyLinkedList = LinkedList()
+            val firstRecord = LinkedList<ItemCell>()
+            firstRecord.addFirst(itemCell)
+            historyLinkedList.push(firstRecord)
+            history.value = historyLinkedList
+            cursor.value = historyLinkedList.indexOf(firstRecord)
 
-        val addOperation = Operation(itemCell, OperationType.ADD_ITEM)
-        val undoStack = undoStackLiveData.value ?: Stack<Operation>()
-        undoStack.push(addOperation)
+            return
+        }
 
-        undoStackLiveData.value = undoStack
-        redoStackLiveData.value = null
+        val lastRecord = historyLinkedList.peek()
+        if (lastRecord != null) {
+            val newRecord = LinkedList(lastRecord)
+            newRecord.addFirst(itemCell)
+            historyLinkedList.push(newRecord)
+            history.value = historyLinkedList
+            cursor.value = historyLinkedList.indexOf(newRecord)
+        }
     }
 
     override fun removeItem(itemCell: ItemCell) {
-        val list = database.value
-        if (list.isNullOrEmpty()) return
+        val historyLinkedList = history.value
+        if (historyLinkedList.isNullOrEmpty()) return
 
-        list.remove(itemCell)
-        database.value = list
+        val lastRecord = historyLinkedList.peek()
+        if (lastRecord != null) {
 
-        val removeOperation = Operation(itemCell, OperationType.REMOVE_ITEM)
-        val undoStack = undoStackLiveData.value ?: Stack()
-        undoStack.push(removeOperation)
+            val newRecord = LinkedList(lastRecord)
+            newRecord.remove(itemCell)
+            historyLinkedList.push(newRecord)
+            history.value = historyLinkedList
+            cursor.value = historyLinkedList.indexOf(newRecord)
 
-        undoStackLiveData.value = undoStack
+        }
     }
 
-    override fun getAllCells(): LiveData<LinkedList<ItemCell>> {
-        return database
+    override fun getLatestRecord(): LiveData<List<ItemCell>> {
+        return Transformations.map(history) {
+            it.peek()?.toList()
+        }
     }
 
     override fun undo() {
-        val undoStack = undoStackLiveData.value
-        if (undoStack.isNullOrEmpty()) return
+        val cursorPosition = cursor.value
+        val historyLinkedList = history.value
+        if (historyLinkedList.isNullOrEmpty() || cursorPosition == null || cursorPosition == historyLinkedList.size - 1) return
 
-        val redoStack = redoStackLiveData.value ?: Stack()
-        val data = database.value
-
-        val lastOperation = undoStack.pop()
-        when (lastOperation.type) {
-
-            OperationType.ADD_ITEM -> {
-                data?.remove(lastOperation.itemCell)
-                lastOperation.type = OperationType.REMOVE_ITEM
-                redoStack.push(lastOperation)
-            }
-
-            OperationType.REMOVE_ITEM -> {
-                data?.addFirst(lastOperation.itemCell)
-                lastOperation.type = OperationType.ADD_ITEM
-                redoStack.push(lastOperation)
-            }
-        }
-
-        redoStackLiveData.value = redoStack
-        undoStackLiveData.value = undoStack
-        database.value = data
+        val previousRecord = historyLinkedList[cursorPosition + 1]
+        historyLinkedList.push(previousRecord)
+        history.value = historyLinkedList
+        cursor.value = cursorPosition + 2
+        redoCounter.value = (redoCounter.value ?: 0) + 1
     }
 
     override fun redo() {
-        val redoStack = redoStackLiveData.value
-        if (redoStack.isNullOrEmpty()) return
+        val redoTimes = redoCounter.value
+        if (redoTimes == null || redoTimes == 0) return
 
-        val undoStack = undoStackLiveData.value ?: Stack()
-        val data = database.value
+        val cursorPosition = cursor.value
+        val historyLinkedList = history.value
+        if (historyLinkedList.isNullOrEmpty() || cursorPosition == null || cursorPosition == 0) return
 
-        val lastOperation = redoStack.pop()
-
-        when (lastOperation.type) {
-
-            OperationType.ADD_ITEM -> {
-                data?.remove(lastOperation.itemCell)
-                lastOperation.type = OperationType.REMOVE_ITEM
-                undoStack.push(lastOperation)
-            }
-
-            OperationType.REMOVE_ITEM -> {
-                data?.addFirst(lastOperation.itemCell)
-                lastOperation.type = OperationType.ADD_ITEM
-                undoStack.push(lastOperation)
-            }
-        }
-        redoStackLiveData.value = redoStack
-        undoStackLiveData.value = undoStack
-        database.value = data
+        val followingRecord = historyLinkedList[cursorPosition - 1]
+        historyLinkedList.push(followingRecord)
+        history.value = historyLinkedList
+        redoCounter.value = (redoCounter.value ?: 0) - 1
+        cursor.value = cursorPosition
     }
 
-    override fun getUndoStackSize(): LiveData<Int> {
-        return Transformations.map(undoStackLiveData) {
-            it?.size
+    override fun isRedoAvailable(): LiveData<Boolean> {
+        return Transformations.map(redoCounter) {
+            it != null && it > 0
         }
     }
 
-    override fun getRedoStackSize(): LiveData<Int> {
-        return Transformations.map(redoStackLiveData) {
-            it?.size
+    override fun isUndoAvailable(): LiveData<Boolean> {
+        return Transformations.map(cursor) {
+            val history = history.value
+
+            history != null && it != null && it < history.size - 1
         }
     }
 
     override fun clearAll() {
-        database.value = null
-        undoStackLiveData.value = null
-        redoStackLiveData.value = null
+
     }
 }

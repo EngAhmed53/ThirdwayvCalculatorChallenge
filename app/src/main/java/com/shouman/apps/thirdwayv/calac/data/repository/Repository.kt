@@ -7,7 +7,9 @@ import com.shouman.apps.thirdwayv.calac.data.model.ItemCell
 import com.shouman.apps.thirdwayv.calac.executors.AppExecutors
 import java.util.*
 
-
+/**
+ * This Interface Represent the behavior for each repository implements it
+ */
 interface IRepository {
     fun addNewCell(itemCell: ItemCell)
     fun removeItem(itemCell: ItemCell)
@@ -21,17 +23,33 @@ interface IRepository {
 
 class MainRepository : IRepository {
 
+    /**
+     * This MutableLive Data save the history of the operation the user inserted or removed during
+     * application life cycle.
+     * it start with an empty linkedList as a first action.
+     */
     private val history = MutableLiveData<LinkedList<LinkedList<ItemCell>>>().apply {
         val initialHistory = LinkedList<LinkedList<ItemCell>>()
         initialHistory.add(LinkedList())
         value = initialHistory
     }
 
+    /**
+     * This MutableLive Data save the <b>History Cursor Position</b> which selected by the user
+     * it used to return the user the selected history operations list.
+     */
     private val cursor = MutableLiveData<Int?>()
 
+    /**
+     * This MutableLive Data save the number of how many time the user pressed a successful undo clicks.
+     */
     private val redoCounter = MutableLiveData<Int?>()
 
 
+    /**
+     * This method add a new cell item and add a new history record it history live data, it run in background thread to not block the main thread.
+     * @param itemCell - the new cell to add
+     */
     override fun addNewCell(itemCell: ItemCell) {
 
         AppExecutors.getsInstance().diskIO.execute {
@@ -59,6 +77,10 @@ class MainRepository : IRepository {
         }
     }
 
+    /**
+     * This method remove cell item and add a history record to history live data, it run in background thread to not block the main thread.
+     * @param itemCell - the cell to remove
+     */
     override fun removeItem(itemCell: ItemCell) {
 
         AppExecutors.getsInstance().diskIO.execute {
@@ -79,12 +101,19 @@ class MainRepository : IRepository {
         }
     }
 
+    /**
+     * This method return the most new record for the user to populate the recycler view with it
+     *@return LiveData object with a list of cellsItems
+     */
     override fun getLatestRecord(): LiveData<List<ItemCell>> {
         return Transformations.map(history) {
             it?.peek()?.toList()
         }
     }
 
+    /**
+     * This Method undo the last operation done by the user, and it run in background thread.
+     */
     override fun undo() {
 
         AppExecutors.getsInstance().diskIO.execute {
@@ -105,6 +134,10 @@ class MainRepository : IRepository {
         }
     }
 
+
+    /**
+     * This Method redo the last undo operation done by the user, and it run in background thread.
+     */
     override fun redo() {
 
         AppExecutors.getsInstance().diskIO.execute {
@@ -125,12 +158,18 @@ class MainRepository : IRepository {
         }
     }
 
+    /**
+     * This method return a liveData with boolean to represent if redo operation is available.
+     */
     override fun isRedoAvailable(): LiveData<Boolean> {
         return Transformations.map(redoCounter) {
             it != null && it > 0
         }
     }
 
+    /**
+     * This method return a liveData with boolean to represent if undo operation is available.
+     */
     override fun isUndoAvailable(): LiveData<Boolean> {
         return Transformations.map(cursor) {
             val history = history.value
@@ -139,6 +178,9 @@ class MainRepository : IRepository {
         }
     }
 
+    /**
+     * This method clear all database, history and counters.
+     */
     override fun clearAll() {
         this.cursor.value = null
         this.history.value = null

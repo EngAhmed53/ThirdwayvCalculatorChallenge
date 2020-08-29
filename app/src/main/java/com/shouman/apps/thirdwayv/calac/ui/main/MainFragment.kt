@@ -10,11 +10,17 @@ import com.shouman.apps.thirdwayv.calac.adapter.CellGridAdapter
 import com.shouman.apps.thirdwayv.calac.data.repository.MainRepository
 import com.shouman.apps.thirdwayv.calac.databinding.MainFragmentBinding
 
+/**
+ * The Application main fragment.
+ */
 class MainFragment : Fragment() {
 
     private lateinit var viewModel: MainViewModel
     private lateinit var mBinding: MainFragmentBinding
 
+    /**
+     * This method called after onCrete(), the BindingObject instantiate in this method
+     */
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -34,6 +40,9 @@ class MainFragment : Fragment() {
         return mBinding.root
     }
 
+    /**
+     * Instantiate the viewModel object in this Method.
+     */
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
         val factory = MainViewModelFactory(MainRepository())

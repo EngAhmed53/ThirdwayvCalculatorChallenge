@@ -1,6 +1,5 @@
 package com.shouman.apps.thirdwayv.calac.bindingAdapter
 
-import android.content.res.ColorStateList
 import android.widget.TextView
 import androidx.core.content.ContextCompat
 import androidx.databinding.BindingAdapter
@@ -9,8 +8,12 @@ import com.google.android.material.textfield.TextInputLayout
 import com.shouman.apps.thirdwayv.calac.R
 import com.shouman.apps.thirdwayv.calac.adapter.CellGridAdapter
 import com.shouman.apps.thirdwayv.calac.data.model.ItemCell
-import java.util.*
 
+
+/**
+ * This Method is a RecyclerView BindingAdapter that fill the recycler view adapter with data
+ * @param list - a List of <b>ItemCell</b>
+ */
 @BindingAdapter("cellsList")
 fun RecyclerView.setData(list: List<ItemCell>?) {
     list?.let {
@@ -19,6 +22,10 @@ fun RecyclerView.setData(list: List<ItemCell>?) {
     }
 }
 
+/**
+ * This Method is a TextView BindingAdapter that fill the text with result data
+ * @param result - a result String
+ */
 @BindingAdapter("result")
 fun TextView.setResult(result: String?) {
     result?.let {
@@ -26,11 +33,20 @@ fun TextView.setResult(result: String?) {
     }
 }
 
+/**
+ * This Method is a TextInputLayout BindingAdapter that add or remove
+ * the endIcon from the TextInputLayout
+ * @param isTextValid - a boolean determine the status of the inserted text
+ */
 @BindingAdapter("setEndIconActive")
 fun TextInputLayout.setCheckMarkActive(isTextValid: Boolean) {
     isEndIconVisible = isTextValid
 }
 
+/**
+ * This Method is a TextView BindingAdapter that set the text with cell value
+ * @param itemCell - the cell connected with this textView
+ */
 @BindingAdapter("cellValue")
 fun TextView.setText(itemCell: ItemCell?) {
     itemCell?.let {
@@ -39,13 +55,18 @@ fun TextView.setText(itemCell: ItemCell?) {
     }
 }
 
+/**
+ * This Method is a TextView BindingAdapter that set the textView background if and only if the selected
+ * operation match the text on the textView
+ * @param operation - the selected math operation
+ */
 @BindingAdapter("selectedStatus")
 fun TextView.setBackground(operation: Char?) {
-    if (operation == text[0]) {
-        background = ContextCompat.getDrawable(context, R.drawable.button_box_shape_selected)
+    background = if (operation == text[0]) {
+        ContextCompat.getDrawable(context, R.drawable.button_box_shape_selected)
     } else {
 
-        background = ContextCompat.getDrawable(context, R.drawable.button_box_shape)
+        ContextCompat.getDrawable(context, R.drawable.button_box_shape)
     }
 }
 

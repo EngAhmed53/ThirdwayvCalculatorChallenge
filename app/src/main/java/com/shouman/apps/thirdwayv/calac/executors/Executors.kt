@@ -5,6 +5,10 @@ import android.os.Looper
 import java.util.concurrent.Executor
 import java.util.concurrent.Executors
 
+/**
+ * A Singleton class for executing operation in background thread.
+ * @param diskIO : A singleThreadExecutors
+ */
 class AppExecutors private constructor(
     val diskIO: Executor,
 ) {

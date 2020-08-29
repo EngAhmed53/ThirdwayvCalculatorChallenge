@@ -59,7 +59,7 @@
             app:layout_constraintEnd_toEndOf="@id/guideline"
             app:layout_constraintStart_toStartOf="@+id/guideline2"
             app:layout_constraintTop_toBottomOf="@+id/result"
-            app:setEndIconActive="@{validator.Companion.isOperandValid(viewModel.operandLiveData)}">
+            app:setEndIconActive="@{validator.isOperandValid(viewModel.operandLiveData)}">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:layout_width="match_parent"
@@ -165,7 +165,7 @@
                 style="@style/CalcButtonStyle"
                 android:layout_width="0dp"
                 android:layout_height="0dp"
-                android:clickable="@{validator.Companion.isOperandValid(viewModel.operandLiveData) &amp;&amp; viewModel.selectedOperationLiveData != null}"
+                android:clickable="@{validator.isOperandValid(viewModel.operandLiveData) &amp;&amp; viewModel.selectedOperationLiveData != null}"
                 android:onClick="@{() -> viewModel.addNewCell()}"
                 android:text="@string/equal"
                 android:textColor="@color/colorPrimary"

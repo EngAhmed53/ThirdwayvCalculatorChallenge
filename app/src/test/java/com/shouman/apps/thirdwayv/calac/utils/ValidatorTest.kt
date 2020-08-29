@@ -30,11 +30,11 @@ class ValidatorTest(
     }
 
     @Test
-    fun isOperandValid() {
+    fun test_isOperandValid() {
         val expected = this.expected
 
         val actual = Validator.isOperandValid(input)
 
-        assertEquals(actual, expected)
+        assertEquals(expected, actual)
     }
 }

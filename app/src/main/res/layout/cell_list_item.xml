@@ -8,6 +8,10 @@
         <variable
             name="item"
             type="com.shouman.apps.thirdwayv.calac.data.model.ItemCell" />
+
+        <import type="com.shouman.apps.thirdwayv.calac.utils.ColorUtils" />
+
+        <import type="androidx.core.content.ContextCompat" />
     </data>
 
     <com.google.android.material.card.MaterialCardView
@@ -15,8 +19,7 @@
         android:layout_height="wrap_content"
         android:layout_margin="8dp"
         app:cardCornerRadius="4dp"
-        app:cardElevation="4dp"
-        tools:background="@color/colorAccent">
+        app:cardElevation="4dp">
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
@@ -27,13 +30,13 @@
                 cellValue="@{item}"
                 android:layout_width="0dp"
                 android:layout_height="0dp"
-                android:background="@android:color/transparent"
+                android:background="@{ContextCompat.getColor(context, ColorUtils.INSTANCE.getBackgroundColorByOperation(item.operation))}"
                 android:ellipsize="end"
                 android:fontFamily="sans-serif"
                 android:gravity="center"
                 android:padding="16dp"
                 android:textAppearance="@style/TextAppearance.MaterialComponents.Headline6"
-                android:textColor="@color/primary_text"
+                android:textColor="@color/icons"
                 app:autoSizeMaxTextSize="20sp"
                 app:autoSizeMinTextSize="12sp"
                 app:autoSizeTextType="uniform"
